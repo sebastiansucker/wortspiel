@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wortspiel</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            margin: 1rem;
+            padding: 0;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin: 1rem 0;
+        }
+        
+        #wort {
+            font-size: 2.5rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            word-wrap: break-word;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #timer {
+            font-size: 1.5rem;
+            color: #555;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+        
+        #count {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        
+        button {
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 1rem 0;
+        }
+        
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .class-selection {
+            margin: 2rem 0;
+        }
+        
+        .class-btn {
+            margin: 0.5rem;
+            padding: 1rem 2rem;
+            background-color: #28a745;
+            font-size: 1.2rem;
+        }
+        
+        .class-btn:hover {
+            background-color: #218838;
+        }
+        
+        .class-btn.selected {
+            background-color: #007bff;
+        }
+        
+        .game-area {
+            display: none;
+        }
+        
+        .game-area.active {
+            display: block;
+        }
+        
+        .info {
+            color: #666;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+        
+        /* Tablet-Styles */
+        @media (max-width: 768px) {
+            body {
+                margin: 0.5rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            #wort {
+                font-size: 2rem;
+                margin: 1.5rem 0;
+                padding: 0.75rem;
+            }
+            
+            #timer {
+                font-size: 1.3rem;
+            }
+            
+            button {
+                padding: 0.6rem 1.5rem;
+                font-size: 1rem;
+            }
+            
+            .class-btn {
+                font-size: 1.1rem;
+                padding: 0.8rem 1.8rem;
+            }
+        }
+        
+        /* Mobile-Styles */
+        @media (max-width: 480px) {
+            body {
+                margin: 0.25rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                margin: 0.5rem 0;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+            
+            #wort {
+                font-size: 1.5rem;
+                margin: 1rem 0;
+                padding: 0.5rem;
+            }
+            
+            #timer {
+                font-size: 1.1rem;
+            }
+            
+            #count {
+                font-size: 1rem;
+            }
+            
+            button {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+                width: 80%;
+                max-width: 200px;
+            }
+            
+            .class-btn {
+                display: block;
+                width: 90%;
+                margin: 0.5rem auto;
+                font-size: 1rem;
+            }
+            
+            .info {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Sehr kleine Bildschirme */
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            #wort {
+                font-size: 1.3rem;
+            }
+            
+            #timer {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Wortspiel</h1>
+
+<div class="class-selection" id="classSelection">
+    <h2>Wähle deine Klassenstufe:</h2>
+    <button class="class-btn" id="class12Btn">Klasse 1 & 2</button>
+    <button class="class-btn" id="class34Btn">Klasse 3 & 4</button>
+    <div class="info">
+        <p><strong>Klasse 1 & 2:</strong> Grundwortschatz mit Artikeln (etwa 250 Wörter)</p>
+        <p><strong>Klasse 3 & 4:</strong> Alle Grundwörter + erweiterte Wörter mit Artikeln (etwa 550 Wörter)</p>
+    </div>
+</div>
+
+<div class="game-area" id="gameArea">
+    <div id="selectedClass"></div>
+    <div id="timer">60 s</div>
+    <div id="wort">Bereit...</div>
+    <button id="nextBtn" disabled>Weiter</button>
+    <button id="resetBtn">Neue Klassenstufe wählen</button>
+    <div id="count"></div>
+</div>
+
+<script>
+/* -------------- JavaScript beginnt hier -------------- */
+
+/* 1. Wortlisten für beide Klassenstufen */
+const wortListe12 = [
+  "ab","acht","also","alt","die Ampel","die Antwort","der Apfel","der April","arbeiten",
+  "der Arm","der Ast","die Aufgabe","aufwachen","das Auge","der August","das Auto",
+  "das Baby","baden","der Ball","die Bank","der Bauch","bauen","der Baum","das Bein","der Berg","die Biene",
+  "das Bild","bin","die Birne","das Blatt","blau","bleiben","blühen","die Blume","die Blüte",
+  "der Boden","braun","der Brief","bringen","das Brot","der Bruder","das Buch","bunt","die Burg",
+  "der Busch","der Cent","danken","dein","der Dezember","dich","der Dienstag","der Donnerstag",
+  "die Dose","drei","das Ei","der Eimer","einmal","eins","elf","die Eltern","das Ende","eng",
+  "die Ente","die Erde","euch","die Eule","der Euro","fallen","fangen","der Februar","das Feld",
+  "das Fenster","das Feuer","finden","der Finger","die Flasche","fliegen","der Flügel","fragen",
+  "die Frau","der Freitag","freuen","der Freund","die Frucht","der Frühling","fünf","der Fuß",
+  "die Gabel","der Garten","geben","gehen","gelb","das Geld","das Gemüse","das Gesicht",
+  "gesund","das Gras","groß","grün","gut","das Haar","haben","der Hals","halten","die Hand",
+  "hart","der Hase","das Haus","die Haut","heiß","heißen","helfen","hell","der Herbst",
+  "heute","die Hexe","die Hilfe","der Himmel","hören","die Hose","der Hund","hundert",
+  "der Igel","immer","ja","das Jahr","der Januar","der Juli","der Junge","der Juni",
+  "der Käfer","der Kalender","kalt","die Katze","kaufen","das Kind","die Klasse","das Kleid",
+  "klein","kommen","können","der Kopf","der Körper","krank","die Küche","die Kuh",
+  "lachen","das Laub","laufen","laut","leben","legen","leicht","leise",
+  "lernen","lesen","das Licht","lieb","liegen",
+  "machen","das Mädchen","der Mai","malen","der Mann","der März","die Maus","die Milch","die Minute",
+  "der Mittwoch","mögen","der Monat","der Montag","morgen","der Mund","müssen","die Mutter",
+  "die Nacht","der Name","die Nase","der Nebel","nein","neu","neun","nie","der November",
+  "das Obst","oft","das Ohr","der Oktober","der Onkel",
+  "das Pferd","pflanzen","pflegen","die Pizza","die Puppe",
+  "quaken",
+  "der Raum","die Raupe","rechnen","reden","der Regen","reich","reisen","der Rock",
+  "rollen","rot","der Rücken","rufen",
+  "der Saft","sagen","das Salz","der Samstag","der Sand","der Satz","schauen","scheinen",
+  "die Schere","das Schiff","schlafen","schlagen","der Schnee","schneiden","schnell",
+  "schön","schreiben","der Schuh","die Schule","schwarz","die Schwester","sechs",
+  "sehen","die Seife","die Seite","die Sekunde","der September","sieben","singen","sitzen",
+  "der Sohn","sollen","der Sommer","die Sonne","der Sonntag","spielen","der Sport","stehen",
+  "stellen","der Stift","still","die Stunde","suchen",
+  "der Tag","die Tante","die Tasche","die Tasse","das Taxi","der Tee","das Tier","die Tochter","toll",
+  "tragen","trinken","turnen",
+  "üben","die Uhr",
+  "der Vater","versuchen","vier","der Vogel",
+  "wann","warm","warten","warum","waschen","das Wasser","weg","der Weg","weil",
+  "weiß","weit","wenig","wer","werden","das Wetter","die Wiese","der Wind","der Winter",
+  "die Woche","die Wolke","wollen","das Wort","der Wunsch",
+  "der Zahn","der Zeh","zehn","zeigen","das Zimmer","zwei","zwölf"
+];
+
+// Nur die zusätzlichen Wörter für Klasse 3 & 4
+const zusätzlicheWörter34 = [
+  "der Abend","ähnlich","ändern","anders","die Angst","ärgern","der Arzt",
+  "backen","die Bahn","bald","beginnen","das Beispiel","beißen","belohnen",
+  "beobachten","bequem","bereits","der Beruf","besser","das Bett","bevor",
+  "bewegen","bezahlen","biegen","bisschen","bitten","blicken","blind",
+  "der Blitz","bloß","bohren","das Boot","böse","boxen","der Brand","brennen","die Brille","die Brücke",
+  "der Computer",
+  "die Decke","denken","deutsch","dick","der Donner","draußen","drehen","der Druck",
+  "dumm","dunkel","dünn","dürfen","der Durst",
+  "die Ecke","ehrlich","eigentlich","entdecken","entfernen","entwickeln",
+  "erklären","erlauben","erleben","ernähren","erschrecken","erwarten",
+  "erzählen","essen","das Europa",
+  "fahren","das Fahrrad","die Familie","der Fehler","die Ferien","der Fernseher","fertig",
+  "fett","feucht","die Feuerwehr","der Fleiß","fließen","das Flugzeug","der Fluss",
+  "flüssig","frei","fremd","fressen","der Frieden","frieren","frisch",
+  "fröhlich","frühstücken","der Fuchs","fühlen","füllen",
+  "das Gebäude","die Geburt","die Gefahr","gefallen","geheim","die Gemeinde","das Geschäft",
+  "das Gesetz","gestern","gewinnen","das Gewitter","gießen","glatt","das Glück",
+  "glühen","der Gott","der Gruß",
+  "das Handy","hängen","häufig","die Hecke","heizen","das Hemd","der Herr","die Hitze",
+  "hoffen","die Höhe","hohl","der Hunger",
+  "impfen","informieren","das Interesse",
+  "jede","jemand","jetzt","jung",
+  "der Käfig","der Kamm","kaputt","kennen","klar","klettern","die Kraft","kratzen",
+  "die Kreuzung","kriechen","der Krieg","kühl","der Kuss",
+  "das Land","lang","langsam","der Lärm","lassen","der Lehrer","letzte","leuchten",
+  "das Lexikon","das Lied","links","der Löffel",
+  "der Magnet","die Maschine","das Meer","messen","das Messer","die Miete","der Mittag","die Mitte",
+  "mixen","das Moos","der Müll",
+  "der Nachmittag","nächste","nah","nähen","die Nahrung","nass","die Natur","nehmen",
+  "niemand","die Nummer","die Nuss","nützlich",
+  "ob","offen","das Ostern",
+  "packen","das Paket","das Papier","passen","der Pilz","der Platz","plötzlich","das Programm",
+  "das Quadrat","quälen","die Quelle",
+  "das Radio","raten","rechts","das Reh","reißen","rennen","richtig","riechen",
+  "die Ruhe","rühren",
+  "sammeln","schalten","scharf","der Schatten","schieben","schief","schließen",
+  "schließlich","das Schloss","der Schlüssel","schmecken","der Schmutz","der Schreck",
+  "schreien","der Schutz","schweigen","schwierig","schwimmen","schwitzen",
+  "der See","seit","der Spaß","der Spaziergang","spät","der Spiegel","spitz","die Stadt",
+  "der Stamm","die Stange","stark","der Stiel","stimmen","der Stoff","der Strand","die Straße",
+  "der Strauch","der Strauß","streiten","das Stück","der Stuhl","der Sturm","süß",
+  "die Tabelle","die Tanne","tausend","die Technik","das Telefon","der Teller","die Temperatur",
+  "der Text","das Theater","das Thermometer","tief","die Träne","der Traum","treffen","trocken",
+  "überqueren","ungefähr","der Unterricht","der Urlaub",
+  "die Vase","verbieten","verbrauchen","verbrennen","vergessen","der Verkehr",
+  "verletzen","verlieren","verpacken","verschmutzen","vielleicht","voll",
+  "die Vorfahrt","die Vorsicht",
+  "wachsen","wählen","während","der Wald","wechseln","der Wecker","das Weihnachten",
+  "wichtig","wiegen","wild","wissen","wohnen","die Wurzel",
+  "die Zahl","zeichnen","die Zeitung","das Zeugnis","ziehen","das Ziel","der Zucker",
+  "die Zukunft","zurück","zusammen","die Zwiebel"
+];
+
+// Kombinierte Wortliste für Klasse 3 & 4 (Grundwortschatz + zusätzliche Wörter)
+const wortListe34 = [...wortListe12, ...zusätzlicheWörter34];
+
+/* 2. Spielvariablen */
+let timerId, restzeit = 60;
+let gelesen = 0;
+let aktuell = "";
+let aktuelleWortliste = [];
+let gewählteKlasse = "";
+
+/* 3. DOM-Elemente */
+const classSelection = document.getElementById('classSelection');
+const gameArea = document.getElementById('gameArea');
+const class12Btn = document.getElementById('class12Btn');
+const class34Btn = document.getElementById('class34Btn');
+const selectedClassEl = document.getElementById('selectedClass');
+const wortEl = document.getElementById('wort');
+const timerEl = document.getElementById('timer');
+const nextBtn = document.getElementById('nextBtn');
+const resetBtn = document.getElementById('resetBtn');
+const countEl = document.getElementById('count');
+
+/* 4. Klassenauswahl */
+function wähleKlasse(klasse) {
+    gewählteKlasse = klasse;
+    if (klasse === '12') {
+        aktuelleWortliste = wortListe12;
+        selectedClassEl.innerHTML = '<h3>🎯 Klasse 1 & 2 - Grundwortschatz</h3>';
+    } else {
+        aktuelleWortliste = wortListe34;
+        selectedClassEl.innerHTML = '<h3>🎯 Klasse 3 & 4 - Grundwortschatz + Erweiterung</h3>';
+    }
+    
+    classSelection.style.display = 'none';
+    gameArea.classList.add('active');
+    
+    // Spiel initialisieren
+    resetGame();
+    zeigeWort();
+    startTimer();
+}
+
+/* 5. Spiel zurücksetzen */
+function resetGame() {
+    if (timerId) {
+        clearInterval(timerId);
+    }
+    restzeit = 60;
+    gelesen = 0;
+    countEl.textContent = '';
+    timerEl.textContent = '60s';
+    nextBtn.disabled = false;
+}
+
+/* 6. Zurück zur Klassenauswahl */
+function zurückZurAuswahl() {
+    if (timerId) {
+        clearInterval(timerId);
+    }
+    gameArea.classList.remove('active');
+    classSelection.style.display = 'block';
+    resetGame();
+    wortEl.textContent = 'Bereit...';
+}
+
+/* 7. Zufälliges Wort auswählen */
+function zufallWort() {
+    return aktuelleWortliste[Math.floor(Math.random() * aktuelleWortliste.length)];
+}
+
+/* 8. Zeige neues Wort */
+function zeigeWort() {
+    aktuell = zufallWort();
+    wortEl.textContent = aktuell;
+    nextBtn.disabled = false;
+}
+
+/* 9. Timer-Logik */
+function startTimer() {
+    timerEl.textContent = `${restzeit}s`;
+    timerId = setInterval(() => {
+        restzeit--;
+        timerEl.textContent = `${restzeit}s`;
+        if (restzeit <= 0) {
+            clearInterval(timerId);
+            nextBtn.disabled = true;
+            wortEl.textContent = "⏰ Zeit abgelaufen!";
+            countEl.innerHTML = `
+                <div style="background-color: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <h3>🎉 Ergebnis</h3>
+                    <p><strong>Du hast ${gelesen} Wörter gelesen!</strong></p>
+                    <p style="color: #666;">Wortschatz: ${gewählteKlasse === '12' ? 'Klasse 1 & 2' : 'Klasse 3 & 4'}</p>
+                </div>
+            `;
+        }
+    }, 1000);
+}
+
+/* 10. Event Listener */
+class12Btn.addEventListener('click', () => wähleKlasse('12'));
+class34Btn.addEventListener('click', () => wähleKlasse('34'));
+resetBtn.addEventListener('click', zurückZurAuswahl);
+
+nextBtn.addEventListener('click', () => {
+    gelesen++;
+    zeigeWort();
+});
+
+/* -------------- JavaScript endet hier -------------- */
+</script>
+</body>
+</html>
