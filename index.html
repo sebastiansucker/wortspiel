@@ -84,6 +84,9 @@
         
         .game-area {
             display: none;
+            position: relative;
+            min-height: 100vh;
+            padding-bottom: 80px; /* Platz für den Reset-Button */
         }
         
         .game-area.active {
@@ -94,6 +97,34 @@
             color: #666;
             font-style: italic;
             margin: 1rem 0;
+        }
+        
+        /* Spezielle Styles für die Game-Area Buttons */
+        #nextBtn {
+            display: block;
+            margin: 2rem auto;
+            padding: 1rem 3rem;
+            font-size: 1.3rem;
+            background-color: #28a745;
+        }
+        
+        #nextBtn:hover:not(:disabled) {
+            background-color: #218838;
+        }
+        
+        #resetBtn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #6c757d;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            z-index: 1000;
+        }
+        
+        #resetBtn:hover {
+            background-color: #5a6268;
         }
         
         /* Tablet-Styles */
@@ -127,6 +158,20 @@
             }
         }
         
+        /* Responsive Anpassungen für Game-Area Buttons */
+        @media (max-width: 768px) {
+            #nextBtn {
+                padding: 0.8rem 2.5rem;
+                font-size: 1.2rem;
+            }
+            
+            #resetBtn {
+                bottom: 15px;
+                padding: 0.6rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+        
         /* Mobile-Styles */
         @media (max-width: 480px) {
             body {
@@ -136,6 +181,22 @@
             h1 {
                 font-size: 1.5rem;
                 margin: 0.5rem 0;
+            }
+            
+            .game-area {
+                padding-bottom: 70px; /* Weniger Platz auf mobilen Geräten */
+            }
+            
+            #nextBtn {
+                padding: 0.7rem 2rem;
+                font-size: 1.1rem;
+                margin: 1.5rem auto;
+            }
+            
+            #resetBtn {
+                bottom: 10px;
+                padding: 0.5rem 1.2rem;
+                font-size: 0.85rem;
             }
             
             h2 {
