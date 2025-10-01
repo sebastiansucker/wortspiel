@@ -11,7 +11,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
+  /* Reduce workers in CI to avoid port conflicts */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
@@ -63,6 +63,7 @@ export default defineConfig({
   webServer: {
     command: 'npm start',
     port: 3000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true, // Always reuse to avoid conflicts in parallel runs
+    timeout: 120 * 1000, // 2 minutes timeout for server start
   },
 });

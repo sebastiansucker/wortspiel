@@ -9,10 +9,11 @@ on:
 
 jobs:
   e2e-tests:
-    timeout-minutes: 10
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     
     strategy:
+      fail-fast: false # Don't cancel other jobs if one fails
       matrix:
         browser: [chromium, firefox, webkit]
     
@@ -32,12 +33,7 @@ jobs:
     - name: Install Playwright browsers
       run: npx playwright install --with-deps ${{ matrix.browser }}
     
-    - name: Start local server
-      run: |
-        npm start &
-        sleep 3 # Wait for server to start
-      env:
-        CI: true
+    # Server wird automatisch von Playwright gestartet (siehe playwright.config.js webServer)
     
     - name: Run E2E tests
       run: npx playwright test --project=${{ matrix.browser }}
