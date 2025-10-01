@@ -1,0 +1,27 @@
+{
+  "name": "wortspiel",
+  "version": "1.0.0",
+  "description": "German Word Reading Game for Elementary Students",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 3000 -c-1",
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:ui": "npx playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@axe-core/playwright": "^4.8.0",
+    "http-server": "^14.1.1"
+  },
+  "keywords": [
+    "german",
+    "education",
+    "reading",
+    "elementary",
+    "vocabulary"
+  ],
+  "author": "Sebastian Sucker",
+  "license": "MIT"
+}
