@@ -1,0 +1,59 @@
+name: End-to-End Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  e2e-tests:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps ${{ matrix.browser }}
+    
+    - name: Start local server
+      run: |
+        npm start &
+        sleep 3 # Wait for server to start
+      env:
+        CI: true
+    
+    - name: Run E2E tests
+      run: npx playwright test --project=${{ matrix.browser }}
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: playwright-report-${{ matrix.browser }}
+        path: playwright-report/
+        retention-days: 7
+    
+    - name: Upload screenshots
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: screenshots-${{ matrix.browser }}
+        path: test-results/
+        retention-days: 7
