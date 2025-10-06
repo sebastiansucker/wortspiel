@@ -5,33 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wortspiel</title>
     <style>
+        :root {
+            /* Logo-inspirierte Farbpalette */
+            --primary-blue: #4A9FD9;
+            --primary-green: #7CB342;
+            --primary-yellow: #FFC107;
+            --primary-red: #E53935;
+            --primary-orange: #FF9800;
+            --gradient-bg: linear-gradient(135deg, #4A9FD9 0%, #7CB342 25%, #FFC107 50%, #FF9800 75%, #E53935 100%);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --border-radius: 16px;
+        }
+        
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
-            margin: 1rem;
-            padding: 0;
-            max-width: 100%;
+            margin: 0;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f5f7ff 0%, #e8f4f8 100%);
+            min-height: 100vh;
             box-sizing: border-box;
         }
         
+        .header {
+            margin: 1rem 0 2rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--gradient-bg);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        
+        .logo-content {
+            font-size: 3rem;
+            font-weight: bold;
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
         h1 {
-            font-size: 2rem;
-            margin: 1rem 0;
+            font-size: 2.5rem;
+            margin: 0;
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
         }
         
         #wort {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin: 2rem 0;
-            padding: 1rem;
+            padding: 2rem;
             word-wrap: break-word;
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #f8f9ff, #e8f4f8);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            font-weight: 600;
+            color: #2c3e50;
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+        
+        #wort::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: var(--gradient-bg);
+            border-radius: var(--border-radius);
+            z-index: -1;
         }
         
         #timer {
-            font-size: 1.5rem;
-            color: #555;
+            font-size: 2rem;
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin: 1rem 0;
             font-weight: bold;
         }
@@ -65,51 +145,119 @@
         
         .class-selection {
             margin: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 600px;
+            margin: 2rem auto;
         }
         
         .class-btn {
-            margin: 0.5rem;
-            padding: 1rem 2rem;
-            background-color: #28a745;
-            font-size: 1.2rem;
+            margin: 0;
+            padding: 1.5rem 2rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
         
         .class-btn:hover {
-            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        #class12Btn {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+        }
+        
+        #class34Btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-yellow));
+        }
+        
+        .chaos-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-orange));
         }
         
         .class-btn.selected {
-            background-color: #007bff;
+            transform: scale(1.05);
         }
         
         .game-area {
             display: none;
             position: relative;
             min-height: 100vh;
-            padding-bottom: 80px; /* Platz für den Reset-Button */
+            padding-bottom: 80px;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
         .game-area.active {
             display: block;
         }
         
-        .info {
-            color: #666;
-            font-style: italic;
+        .game-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
             margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-bg);
+        }
+        
+        .info {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .info p {
+            margin: 0.8rem 0;
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .info strong {
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
         }
         
         /* Spezielle Styles für die Game-Area Buttons */
         #nextBtn {
             display: block;
             margin: 2rem auto;
-            padding: 1rem 3rem;
-            font-size: 1.3rem;
-            background-color: #28a745;
+            padding: 1.2rem 3rem;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         
         #nextBtn:hover:not(:disabled) {
-            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
         
         #resetBtn {
@@ -149,25 +297,35 @@
         }
         
         #correctBtn {
-            background-color: #28a745;
-            padding: 1rem 2rem;
-            font-size: 1.2rem;
+            background: linear-gradient(135deg, var(--primary-green), #4CAF50);
+            padding: 1.2rem 2.5rem;
+            font-size: 1.3rem;
             margin: 0.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         
         #correctBtn:hover:not(:disabled) {
-            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(76, 175, 80, 0.3);
         }
         
         #wrongBtn {
-            background-color: #dc3545;
-            padding: 1rem 2rem;
-            font-size: 1.2rem;
+            background: linear-gradient(135deg, var(--primary-red), #F44336);
+            padding: 1.2rem 2.5rem;
+            font-size: 1.3rem;
             margin: 0.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         
         #wrongBtn:hover:not(:disabled) {
-            background-color: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(244, 67, 54, 0.3);
         }
         
         .word-status {
@@ -177,16 +335,50 @@
             border-radius: 4px;
         }
         
+        .word-status {
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+        
         .word-status.correct {
-            background-color: #d4edda;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border: 2px solid var(--primary-green);
         }
         
         .word-status.incorrect {
-            background-color: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
             color: #721c24;
-            border: 1px solid #f5c6cb;
+            border: 2px solid var(--primary-red);
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .results-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-bg);
+        }
+        
+        .results-card h3 {
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 0;
         }
         
         /* Tablet-Styles */
@@ -247,34 +439,47 @@
         /* Mobile-Styles */
         @media (max-width: 480px) {
             body {
-                margin: 0.25rem;
+                padding: 0.5rem;
+            }
+            
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .logo-content {
+                font-size: 2rem;
             }
             
             h1 {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
                 margin: 0.5rem 0;
             }
             
             .game-area {
-                padding-bottom: 70px; /* Weniger Platz auf mobilen Geräten */
+                padding-bottom: 70px;
+            }
+            
+            .game-card {
+                padding: 1.5rem;
             }
             
             #nextBtn {
-                padding: 0.7rem 2rem;
-                font-size: 1.1rem;
+                padding: 1rem 2rem;
+                font-size: 1.2rem;
                 margin: 1.5rem auto;
             }
             
             #resetBtn {
                 bottom: 10px;
-                padding: 0.5rem 1.2rem;
-                font-size: 0.85rem;
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
             }
             
             #correctBtn, #wrongBtn {
-                padding: 0.7rem 1.3rem;
-                font-size: 1rem;
-                margin: 0.2rem;
+                padding: 1rem 1.5rem;
+                font-size: 1.1rem;
+                margin: 0.3rem;
             }
             
             h2 {
@@ -332,7 +537,12 @@
 </head>
 <body>
 
-<h1>Wortspiel</h1>
+<div class="header">
+    <div class="logo">
+        <div class="logo-content">W</div>
+    </div>
+    <h1>Wortspiel</h1>
+</div>
 
 <div class="class-selection" id="classSelection">
     <h2>Wähle deine Klassenstufe:</h2>
@@ -348,16 +558,22 @@
 
 <div class="game-area" id="gameArea">
     <div id="selectedClass"></div>
-    <div id="timer">60 s</div>
-    <div id="wort">Bereit...</div>
-    <button id="nextBtn" disabled>Weiter</button>
-    <div class="answer-buttons" id="answerButtons">
-        <button id="correctBtn">✓ Richtig</button>
-        <button id="wrongBtn">✗ Falsch</button>
+    
+    <div class="game-card">
+        <div id="timer">60 s</div>
+        <div id="wort">Bereit...</div>
+        
+        <button id="nextBtn" disabled>Weiter</button>
+        <div class="answer-buttons" id="answerButtons">
+            <button id="correctBtn">✓ Richtig</button>
+            <button id="wrongBtn">✗ Falsch</button>
+        </div>
+        
+        <div id="wordStatus" class="word-status"></div>
     </div>
-    <div id="wordStatus" class="word-status"></div>
-    <button id="resetBtn">Neue Klassenstufe wählen</button>
+    
     <div id="count"></div>
+    <button id="resetBtn">Neue Klassenstufe wählen</button>
 </div>
 
 <script>
@@ -670,7 +886,7 @@ function startTimer() {
             if (chaosModus) {
                 const prozent = gelesen > 0 ? Math.round((korrekte / gelesen) * 100) : 0;
                 ergebnisText = `
-                    <div style="background-color: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <div class="results-card">
                         <h3>🎉 Chaos Modus Ergebnis</h3>
                         <p><strong>${gelesen} Wörter geprüft!</strong></p>
                         <p>✓ Richtig: ${korrekte} | ✗ Falsch: ${falsche}</p>
@@ -681,7 +897,7 @@ function startTimer() {
             } else {
                 const modusText = gewählteKlasse === '12' ? 'Klasse 1 & 2' : 'Klasse 3 & 4';
                 ergebnisText = `
-                    <div style="background-color: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <div class="results-card">
                         <h3>🎉 Ergebnis</h3>
                         <p><strong>Du hast ${gelesen} Wörter gelesen!</strong></p>
                         <p style="color: #666;">Wortschatz: ${modusText}</p>
