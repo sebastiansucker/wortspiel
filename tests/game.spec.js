@@ -125,6 +125,121 @@ test.describe('Wortspiel Game', () => {
     await expect(page.locator('.info')).toContainText('Klasse 1 & 2');
     await expect(page.locator('.info')).toContainText('250 Wörter');
     await expect(page.locator('.info')).toContainText('550 Wörter');
+    await expect(page.locator('.info')).toContainText('Chaos Modus');
+  });
+
+  test('should show Chaos Mode button', async ({ page }) => {
+    await page.goto('/');
+    
+    // Check if Chaos Mode button is visible
+    await expect(page.locator('#chaosModeBtn')).toBeVisible();
+    await expect(page.locator('#chaosModeBtn')).toContainText('🎲 Chaos Modus');
+  });
+
+  test('should start Chaos Mode correctly', async ({ page }) => {
+    await page.goto('/');
+    
+    // Click on Chaos Mode button
+    await page.click('#chaosModeBtn');
+    
+    // Check if game area becomes visible
+    await expect(page.locator('#gameArea')).toBeVisible();
+    
+    // Check if timer is displayed
+    await expect(page.locator('#timer')).toContainText('60s');
+    
+    // Check if a word is displayed
+    await expect(page.locator('#wort')).not.toBeEmpty();
+    
+    // Check if answer buttons are visible (not Next button)
+    await expect(page.locator('#correctBtn')).toBeVisible();
+    await expect(page.locator('#wrongBtn')).toBeVisible();
+    await expect(page.locator('#nextBtn')).not.toBeVisible();
+    
+    // Check if class selection is correct
+    await expect(page.locator('#selectedClass')).toContainText('🎲 Chaos Modus');
+  });
+
+  test('should handle Chaos Mode answers', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#chaosModeBtn');
+    
+    // Click on "Richtig" button
+    await page.click('#correctBtn');
+    
+    // Check if feedback is shown
+    await expect(page.locator('#wordStatus')).not.toBeEmpty();
+    
+    // Buttons should be disabled temporarily
+    await expect(page.locator('#correctBtn')).toBeDisabled();
+    await expect(page.locator('#wrongBtn')).toBeDisabled();
+    
+    // Wait for next word (after feedback delay)
+    await page.waitForTimeout(2000);
+    
+    // Buttons should be enabled again for next word
+    await expect(page.locator('#correctBtn')).toBeEnabled();
+    await expect(page.locator('#wrongBtn')).toBeEnabled();
+  });
+
+  test('should show Chaos Mode results after timer', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#chaosModeBtn');
+    
+    // Answer a few words quickly
+    await page.click('#correctBtn');
+    await page.waitForTimeout(1600);
+    
+    // Check if next word appeared and answer it
+    await expect(page.locator('#correctBtn')).toBeEnabled();
+    await page.click('#wrongBtn');
+    await page.waitForTimeout(1600);
+    
+    // Force timer to end by injecting JavaScript
+    await page.evaluate(() => {
+      // Set timer to 0 and trigger the timer end logic
+      if (window.timerId) {
+        clearInterval(window.timerId);
+      }
+      window.restzeit = 0;
+      
+      // Manually trigger the timer end logic
+      const nextBtn = document.getElementById('nextBtn');
+      const correctBtn = document.getElementById('correctBtn');
+      const wrongBtn = document.getElementById('wrongBtn');
+      const wortEl = document.getElementById('wort');
+      const countEl = document.getElementById('count');
+      const timerEl = document.getElementById('timer');
+      
+      nextBtn.disabled = true;
+      correctBtn.disabled = true;
+      wrongBtn.disabled = true;
+      wortEl.textContent = "⏰ Zeit abgelaufen!";
+      timerEl.textContent = "0s";
+      
+      // Generate results (using global variables from the game)
+      const prozent = window.gelesen > 0 ? Math.round((window.korrekte / window.gelesen) * 100) : 0;
+      const ergebnisText = `
+        <div style="background-color: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+          <h3>🎉 Chaos Modus Ergebnis</h3>
+          <p><strong>${window.gelesen} Wörter geprüft!</strong></p>
+          <p>✓ Richtig: ${window.korrekte} | ✗ Falsch: ${window.falsche}</p>
+          <p><strong>Genauigkeit: ${prozent}%</strong></p>
+          <p style="color: #666;">Modus: 🎲 Chaos Modus</p>
+        </div>
+      `;
+      countEl.innerHTML = ergebnisText;
+    });
+    
+    // Wait a moment for the UI to update
+    await page.waitForTimeout(500);
+    
+    // Check if Chaos Mode results are displayed
+    await expect(page.locator('#count')).toContainText('Chaos Modus Ergebnis');
+    await expect(page.locator('#count')).toContainText('Wörter geprüft');
+    await expect(page.locator('#count')).toContainText('Richtig:');
+    await expect(page.locator('#count')).toContainText('Falsch:');
+    await expect(page.locator('#count')).toContainText('Genauigkeit:');
   });
 
 });

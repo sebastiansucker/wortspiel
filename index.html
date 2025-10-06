@@ -127,6 +127,68 @@
             background-color: #5a6268;
         }
         
+        /* Chaos Modus Styles */
+        .chaos-btn {
+            background-color: #dc3545;
+        }
+        
+        .chaos-btn:hover {
+            background-color: #c82333;
+        }
+        
+        .answer-buttons {
+            display: none;
+            margin: 2rem 0;
+            gap: 1rem;
+        }
+        
+        .answer-buttons.active {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        #correctBtn {
+            background-color: #28a745;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            margin: 0.5rem;
+        }
+        
+        #correctBtn:hover:not(:disabled) {
+            background-color: #218838;
+        }
+        
+        #wrongBtn {
+            background-color: #dc3545;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            margin: 0.5rem;
+        }
+        
+        #wrongBtn:hover:not(:disabled) {
+            background-color: #c82333;
+        }
+        
+        .word-status {
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .word-status.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .word-status.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
         /* Tablet-Styles */
         @media (max-width: 768px) {
             body {
@@ -170,6 +232,16 @@
                 padding: 0.6rem 1.5rem;
                 font-size: 0.9rem;
             }
+            
+            #correctBtn, #wrongBtn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1.1rem;
+                margin: 0.3rem;
+            }
+            
+            .answer-buttons {
+                gap: 0.5rem;
+            }
         }
         
         /* Mobile-Styles */
@@ -197,6 +269,12 @@
                 bottom: 10px;
                 padding: 0.5rem 1.2rem;
                 font-size: 0.85rem;
+            }
+            
+            #correctBtn, #wrongBtn {
+                padding: 0.7rem 1.3rem;
+                font-size: 1rem;
+                margin: 0.2rem;
             }
             
             h2 {
@@ -260,9 +338,11 @@
     <h2>Wähle deine Klassenstufe:</h2>
     <button class="class-btn" id="class12Btn">Klasse 1 & 2</button>
     <button class="class-btn" id="class34Btn">Klasse 3 & 4</button>
+    <button class="class-btn chaos-btn" id="chaosModeBtn">🎲 Chaos Modus</button>
     <div class="info">
         <p><strong>Klasse 1 & 2:</strong> Grundwortschatz mit Artikeln (etwa 250 Wörter)</p>
         <p><strong>Klasse 3 & 4:</strong> Alle Grundwörter + erweiterte Wörter mit Artikeln (etwa 550 Wörter)</p>
+        <p><strong>🎲 Chaos Modus:</strong> Rechtschreibung prüfen - Richtig oder Falsch? (alle Wörter)</p>
     </div>
 </div>
 
@@ -271,6 +351,11 @@
     <div id="timer">60 s</div>
     <div id="wort">Bereit...</div>
     <button id="nextBtn" disabled>Weiter</button>
+    <div class="answer-buttons" id="answerButtons">
+        <button id="correctBtn">✓ Richtig</button>
+        <button id="wrongBtn">✗ Falsch</button>
+    </div>
+    <div id="wordStatus" class="word-status"></div>
     <button id="resetBtn">Neue Klassenstufe wählen</button>
     <div id="count"></div>
 </div>
@@ -387,28 +472,50 @@ let gelesen = 0;
 let aktuell = "";
 let aktuelleWortliste = [];
 let gewählteKlasse = "";
+let chaosModus = false;
+let istWortRichtig = true;
+let korrekte = 0, falsche = 0;
 
 /* 3. DOM-Elemente */
 const classSelection = document.getElementById('classSelection');
 const gameArea = document.getElementById('gameArea');
 const class12Btn = document.getElementById('class12Btn');
 const class34Btn = document.getElementById('class34Btn');
+const chaosModeBtn = document.getElementById('chaosModeBtn');
 const selectedClassEl = document.getElementById('selectedClass');
 const wortEl = document.getElementById('wort');
 const timerEl = document.getElementById('timer');
 const nextBtn = document.getElementById('nextBtn');
 const resetBtn = document.getElementById('resetBtn');
 const countEl = document.getElementById('count');
+const answerButtons = document.getElementById('answerButtons');
+const correctBtn = document.getElementById('correctBtn');
+const wrongBtn = document.getElementById('wrongBtn');
+const wordStatus = document.getElementById('wordStatus');
 
 /* 4. Klassenauswahl */
 function wähleKlasse(klasse) {
     gewählteKlasse = klasse;
+    chaosModus = (klasse === 'chaos');
+    
     if (klasse === '12') {
         aktuelleWortliste = wortListe12;
         selectedClassEl.innerHTML = '<h3>🎯 Klasse 1 & 2 - Grundwortschatz</h3>';
-    } else {
+    } else if (klasse === '34') {
         aktuelleWortliste = wortListe34;
         selectedClassEl.innerHTML = '<h3>🎯 Klasse 3 & 4 - Grundwortschatz + Erweiterung</h3>';
+    } else if (klasse === 'chaos') {
+        aktuelleWortliste = wortListe34; // Verwende alle Wörter für Chaos Modus
+        selectedClassEl.innerHTML = '<h3>🎲 Chaos Modus - Rechtschreibung prüfen</h3>';
+    }
+    
+    // UI für verschiedene Modi anpassen
+    if (chaosModus) {
+        nextBtn.style.display = 'none';
+        answerButtons.classList.add('active');
+    } else {
+        nextBtn.style.display = 'block';
+        answerButtons.classList.remove('active');
     }
     
     classSelection.style.display = 'none';
@@ -427,9 +534,15 @@ function resetGame() {
     }
     restzeit = 60;
     gelesen = 0;
+    korrekte = 0;
+    falsche = 0;
     countEl.textContent = '';
     timerEl.textContent = '60s';
     nextBtn.disabled = false;
+    correctBtn.disabled = false;
+    wrongBtn.disabled = false;
+    wordStatus.textContent = '';
+    wordStatus.className = 'word-status';
 }
 
 /* 6. Zurück zur Klassenauswahl */
@@ -448,14 +561,99 @@ function zufallWort() {
     return aktuelleWortliste[Math.floor(Math.random() * aktuelleWortliste.length)];
 }
 
-/* 8. Zeige neues Wort */
-function zeigeWort() {
-    aktuell = zufallWort();
-    wortEl.textContent = aktuell;
-    nextBtn.disabled = false;
+/* 8. Wort verfremden für Chaos Modus */
+function verfremdeWort(wort) {
+    const verfremdeTypen = [
+        // Buchstaben tauschen
+        (w) => {
+            if (w.length < 4) return w;
+            const arr = w.split('');
+            const i = Math.floor(Math.random() * (arr.length - 1)) + 1;
+            const j = Math.floor(Math.random() * (arr.length - 1)) + 1;
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+            return arr.join('');
+        },
+        // Buchstaben doppeln
+        (w) => {
+            if (w.length < 3) return w;
+            const pos = Math.floor(Math.random() * w.length);
+            return w.slice(0, pos) + w[pos] + w.slice(pos);
+        },
+        // Buchstaben weglassen
+        (w) => {
+            if (w.length < 4) return w;
+            const pos = Math.floor(Math.random() * (w.length - 1)) + 1;
+            return w.slice(0, pos) + w.slice(pos + 1);
+        },
+        // Häufige Rechtschreibfehler
+        (w) => w.replace(/ei/g, 'ai').replace(/ie/g, 'ee').replace(/ck/g, 'k').replace(/tz/g, 'z'),
+        // Buchstaben ersetzen
+        (w) => w.replace(/d/g, 't').replace(/b/g, 'p').replace(/g/g, 'k')
+    ];
+    
+    const typIndex = Math.floor(Math.random() * verfremdeTypen.length);
+    return verfremdeTypen[typIndex](wort);
 }
 
-/* 9. Timer-Logik */
+/* 9. Zeige neues Wort */
+function zeigeWort() {
+    const originalWort = zufallWort();
+    
+    if (chaosModus) {
+        // 70% Chance auf falsches Wort, 30% auf richtiges
+        istWortRichtig = Math.random() < 0.3;
+        
+        if (istWortRichtig) {
+            aktuell = originalWort;
+        } else {
+            aktuell = verfremdeWort(originalWort);
+            // Sicherheit: Falls Verfremdung das Wort nicht geändert hat
+            if (aktuell === originalWort) {
+                aktuell = originalWort + 'x'; // Einfache Verfremdung als Fallback
+                istWortRichtig = false;
+            }
+        }
+        
+        wortEl.textContent = aktuell;
+        correctBtn.disabled = false;
+        wrongBtn.disabled = false;
+        wordStatus.textContent = '';
+        wordStatus.className = 'word-status';
+    } else {
+        aktuell = originalWort;
+        wortEl.textContent = aktuell;
+        nextBtn.disabled = false;
+    }
+}
+
+/* 10. Chaos Modus - Antwort verarbeiten */
+function verarbeiteAntwort(userAntwort) {
+    const richtigeAntwort = istWortRichtig;
+    const istKorrekt = (userAntwort === richtigeAntwort);
+    
+    if (istKorrekt) {
+        korrekte++;
+        wordStatus.textContent = istWortRichtig ? '✓ Richtig! Das Wort ist korrekt geschrieben.' : '✓ Richtig! Das Wort ist falsch geschrieben.';
+        wordStatus.className = 'word-status correct';
+    } else {
+        falsche++;
+        wordStatus.textContent = istWortRichtig ? '✗ Falsch! Das Wort ist richtig geschrieben.' : '✗ Falsch! Das Wort ist falsch geschrieben.';
+        wordStatus.className = 'word-status incorrect';
+    }
+    
+    gelesen++;
+    correctBtn.disabled = true;
+    wrongBtn.disabled = true;
+    
+    // Nach kurzer Verzögerung nächstes Wort zeigen
+    setTimeout(() => {
+        if (restzeit > 0) {
+            zeigeWort();
+        }
+    }, 1500);
+}
+
+/* 11. Timer-Logik */
 function startTimer() {
     timerEl.textContent = `${restzeit}s`;
     timerId = setInterval(() => {
@@ -464,27 +662,51 @@ function startTimer() {
         if (restzeit <= 0) {
             clearInterval(timerId);
             nextBtn.disabled = true;
+            correctBtn.disabled = true;
+            wrongBtn.disabled = true;
             wortEl.textContent = "⏰ Zeit abgelaufen!";
-            countEl.innerHTML = `
-                <div style="background-color: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-                    <h3>🎉 Ergebnis</h3>
-                    <p><strong>Du hast ${gelesen} Wörter gelesen!</strong></p>
-                    <p style="color: #666;">Wortschatz: ${gewählteKlasse === '12' ? 'Klasse 1 & 2' : 'Klasse 3 & 4'}</p>
-                </div>
-            `;
+            
+            let ergebnisText = '';
+            if (chaosModus) {
+                const prozent = gelesen > 0 ? Math.round((korrekte / gelesen) * 100) : 0;
+                ergebnisText = `
+                    <div style="background-color: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <h3>🎉 Chaos Modus Ergebnis</h3>
+                        <p><strong>${gelesen} Wörter geprüft!</strong></p>
+                        <p>✓ Richtig: ${korrekte} | ✗ Falsch: ${falsche}</p>
+                        <p><strong>Genauigkeit: ${prozent}%</strong></p>
+                        <p style="color: #666;">Modus: 🎲 Chaos Modus</p>
+                    </div>
+                `;
+            } else {
+                const modusText = gewählteKlasse === '12' ? 'Klasse 1 & 2' : 'Klasse 3 & 4';
+                ergebnisText = `
+                    <div style="background-color: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <h3>🎉 Ergebnis</h3>
+                        <p><strong>Du hast ${gelesen} Wörter gelesen!</strong></p>
+                        <p style="color: #666;">Wortschatz: ${modusText}</p>
+                    </div>
+                `;
+            }
+            countEl.innerHTML = ergebnisText;
         }
     }, 1000);
 }
 
-/* 10. Event Listener */
+/* 12. Event Listener */
 class12Btn.addEventListener('click', () => wähleKlasse('12'));
 class34Btn.addEventListener('click', () => wähleKlasse('34'));
+chaosModeBtn.addEventListener('click', () => wähleKlasse('chaos'));
 resetBtn.addEventListener('click', zurückZurAuswahl);
 
 nextBtn.addEventListener('click', () => {
     gelesen++;
     zeigeWort();
 });
+
+// Chaos Modus Event Listener
+correctBtn.addEventListener('click', () => verarbeiteAntwort(true));
+wrongBtn.addEventListener('click', () => verarbeiteAntwort(false));
 
 /* -------------- JavaScript endet hier -------------- */
 </script>
