@@ -796,36 +796,138 @@ function zufallWort() {
 
 /* 8. Wort verfremden für Chaos Modus */
 function verfremdeWort(wort) {
+    // Artikel nie verfremden - sie bleiben immer richtig
+    if (wort === 'der' || wort === 'die' || wort === 'das') {
+        return wort;
+    }
+    
+    // Entferne Artikel für die Verfremdung des Hauptworts
+    let artikel = '';
+    let hauptwort = wort;
+    
+    if (wort.startsWith('der ')) {
+        artikel = 'der ';
+        hauptwort = wort.substring(4);
+    } else if (wort.startsWith('die ')) {
+        artikel = 'die ';
+        hauptwort = wort.substring(4);
+    } else if (wort.startsWith('das ')) {
+        artikel = 'das ';
+        hauptwort = wort.substring(4);
+    }
+    
+    // Deutsche Rechtschreibfehler-Typen die Grundschüler häufig machen
     const verfremdeTypen = [
-        // Buchstaben tauschen
+        // ck-Fehler: ck wird zu k oder kk
         (w) => {
-            if (w.length < 4) return w;
-            const arr = w.split('');
-            const i = Math.floor(Math.random() * (arr.length - 1)) + 1;
-            const j = Math.floor(Math.random() * (arr.length - 1)) + 1;
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-            return arr.join('');
+            if (w.includes('ck')) {
+                return Math.random() < 0.5 ? w.replace(/ck/g, 'k') : w.replace(/ck/g, 'kk');
+            }
+            return w;
         },
-        // Buchstaben doppeln
+        
+        // Doppelte Konsonanten vergessen oder falsch setzen
         (w) => {
-            if (w.length < 3) return w;
-            const pos = Math.floor(Math.random() * w.length);
-            return w.slice(0, pos) + w[pos] + w.slice(pos);
-        },
-        // Buchstaben weglassen
-        (w) => {
-            if (w.length < 4) return w;
+            const doppelKonsonanten = ['ll', 'nn', 'mm', 'ss', 'tt', 'ff', 'pp', 'dd'];
+            for (let konsonant of doppelKonsonanten) {
+                if (w.includes(konsonant)) {
+                    // 50% Chance einzeln machen, 50% Chance verdreifachen
+                    return Math.random() < 0.5 
+                        ? w.replace(new RegExp(konsonant, 'g'), konsonant[0])
+                        : w.replace(new RegExp(konsonant, 'g'), konsonant + konsonant[0]);
+                }
+            }
+            // Oder fälschlicherweise doppelte Konsonanten hinzufügen
+            const einfacheKonsonanten = ['n', 'm', 's', 't', 'f', 'p', 'd', 'l'];
             const pos = Math.floor(Math.random() * (w.length - 1)) + 1;
-            return w.slice(0, pos) + w.slice(pos + 1);
+            if (einfacheKonsonanten.includes(w[pos]) && w[pos-1] !== w[pos] && w[pos+1] !== w[pos]) {
+                return w.slice(0, pos) + w[pos] + w.slice(pos);
+            }
+            return w;
         },
-        // Häufige Rechtschreibfehler
-        (w) => w.replace(/ei/g, 'ai').replace(/ie/g, 'ee').replace(/ck/g, 'k').replace(/tz/g, 'z'),
-        // Buchstaben ersetzen
-        (w) => w.replace(/d/g, 't').replace(/b/g, 'p').replace(/g/g, 'k')
+        
+        // h-Fehler: Dehnungs-h vergessen oder falsch setzen
+        (w) => {
+            // h nach Vokal entfernen
+            if (w.match(/[aeiou]h/)) {
+                return w.replace(/([aeiou])h/g, '$1');
+            }
+            // Oder fälschlicherweise h hinzufügen
+            if (w.length > 3 && Math.random() < 0.3) {
+                const vokale = ['a', 'e', 'i', 'o', 'u'];
+                for (let i = 1; i < w.length - 1; i++) {
+                    if (vokale.includes(w[i]) && !vokale.includes(w[i+1]) && w[i+1] !== 'h') {
+                        return w.slice(0, i+1) + 'h' + w.slice(i+1);
+                    }
+                }
+            }
+            return w;
+        },
+        
+        // ie/i-Verwechslung
+        (w) => {
+            if (w.includes('ie')) {
+                return w.replace(/ie/g, 'i');
+            } else if (w.includes('i') && !w.includes('ie')) {
+                // Manchmal fälschlicherweise ie statt i
+                return w.replace(/i([^e])/g, 'ie$1');
+            }
+            return w;
+        },
+        
+        // ai/ei-Verwechslung
+        (w) => {
+            if (w.includes('ei')) {
+                return w.replace(/ei/g, 'ai');
+            } else if (w.includes('ai')) {
+                return w.replace(/ai/g, 'ei');
+            }
+            return w;
+        },
+        
+        // Buchstaben weglassen (häufiger Fehler bei langen Wörtern)
+        (w) => {
+            if (w.length > 4) {
+                // Nicht am Anfang oder Ende
+                const pos = Math.floor(Math.random() * (w.length - 2)) + 1;
+                return w.slice(0, pos) + w.slice(pos + 1);
+            }
+            return w;
+        },
+        
+        // Ähnlich klingende Buchstaben vertauschen
+        (w) => {
+            const vertauschungen = [
+                ['d', 't'], ['b', 'p'], ['g', 'k'], ['w', 'v'], ['f', 'v']
+            ];
+            const paar = vertauschungen[Math.floor(Math.random() * vertauschungen.length)];
+            if (w.includes(paar[0])) {
+                return w.replace(new RegExp(paar[0], 'g'), paar[1]);
+            } else if (w.includes(paar[1])) {
+                return w.replace(new RegExp(paar[1], 'g'), paar[0]);
+            }
+            return w;
+        }
     ];
     
-    const typIndex = Math.floor(Math.random() * verfremdeTypen.length);
-    return verfremdeTypen[typIndex](wort);
+    // Zufälligen Verfremde-Typ auswählen und anwenden
+    let verfremdetes = hauptwort;
+    let versuche = 0;
+    
+    // Mehrere Versuche, um sicherzustellen, dass das Wort tatsächlich geändert wird
+    while (verfremdetes === hauptwort && versuche < 5) {
+        const typIndex = Math.floor(Math.random() * verfremdeTypen.length);
+        verfremdetes = verfremdeTypen[typIndex](hauptwort);
+        versuche++;
+    }
+    
+    // Falls keine Verfremdung funktioniert hat, einfachen Fehler machen
+    if (verfremdetes === hauptwort && hauptwort.length > 2) {
+        // Letzten Buchstaben doppeln als Fallback
+        verfremdetes = hauptwort + hauptwort[hauptwort.length - 1];
+    }
+    
+    return artikel + verfremdetes;
 }
 
 /* 9. Zeige neues Wort */
