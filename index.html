@@ -1043,6 +1043,19 @@ nextBtn.addEventListener('click', () => {
 correctBtn.addEventListener('click', () => verarbeiteAntwort(true));
 wrongBtn.addEventListener('click', () => verarbeiteAntwort(false));
 
+// Service Worker registrieren für PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then((registration) => {
+                console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}
+
 /* -------------- JavaScript endet hier -------------- */
 </script>
 </body>
