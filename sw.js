@@ -1,14 +1,20 @@
 // Service Worker für Wortspiel PWA
 const CACHE_NAME = 'wortspiel-v1';
-const urlsToCache = [
-  './',
-  './index.html',
-  './favicon.svg',
-  './icon-192.png',
-  './icon-512.png',
-  './apple-touch-icon.png',
-  './manifest.json'
-];
+// Build urlsToCache dynamically based on the service worker's scope so the SW
+// works correctly when the site is hosted under a subpath like /wortspiel/.
+function buildUrlsToCache() {
+  const scope = (self.registration && self.registration.scope) ? new URL(self.registration.scope).pathname : '/';
+  const base = scope.endsWith('/') ? scope : scope + '/';
+  return [
+    base,
+    base + 'index.html',
+    base + 'favicon.svg',
+    base + 'icon-192.png',
+    base + 'icon-512.png',
+    base + 'apple-touch-icon.png',
+    base + 'manifest.json'
+  ];
+}
 
 // Installation
 self.addEventListener('install', event => {

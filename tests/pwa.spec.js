@@ -18,8 +18,9 @@ test.describe('PWA iOS Installation Tests', () => {
     // Wichtige PWA-Eigenschaften prüfen
     expect(manifest.name).toBe('Wortspiel - Deutsches Lernspiel');
     expect(manifest.short_name).toBe('Wortspiel');
-    expect(manifest.display).toBe('standalone');
-    expect(manifest.start_url).toBe('./');
+  expect(manifest.display).toBe('standalone');
+  // start_url may be './' for local dev or '/wortspiel/' when hosted under a subpath on GitHub Pages
+  expect(['./', '/wortspiel/']).toContain(manifest.start_url);
     expect(manifest.icons).toBeDefined();
     expect(manifest.icons.length).toBeGreaterThan(0);
   });
