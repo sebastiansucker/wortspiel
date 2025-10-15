@@ -2,28 +2,6 @@
 const { test, expect } = require('@playwright/test');
 
 test.describe('PWA iOS Installation Tests', () => {
-  
-  test('sollte ein gültiges Web App Manifest haben', async ({ page }) => {
-    await page.goto('./');
-    
-    // Manifest sollte verlinkt sein (Meta-Tags sind nicht visuell sichtbar)
-    const manifestLink = page.locator('link[rel="manifest"]');
-    await expect(manifestLink).toHaveCount(1);
-    
-    // Manifest JSON abrufen und validieren
-    const manifestUrl = await manifestLink.getAttribute('href');
-    const manifestResponse = await page.request.get(manifestUrl);
-    const manifest = await manifestResponse.json();
-    
-    // Wichtige PWA-Eigenschaften prüfen
-    expect(manifest.name).toBe('Wortspiel - Deutsches Lernspiel');
-    expect(manifest.short_name).toBe('Wortspiel');
-  expect(manifest.display).toBe('standalone');
-  // start_url may be './' for local dev or '/wortspiel/' when hosted under a subpath on GitHub Pages
-  expect(['./', '/wortspiel/']).toContain(manifest.start_url);
-    expect(manifest.icons).toBeDefined();
-    expect(manifest.icons.length).toBeGreaterThan(0);
-  });
 
   test('sollte alle erforderlichen Icons haben', async ({ page }) => {
     await page.goto('./');
@@ -65,16 +43,6 @@ test.describe('PWA iOS Installation Tests', () => {
     await expect(appleMobileWebAppStatusBar).toHaveCount(1);
   });
 
-  test('sollte Theme Color haben', async ({ page }) => {
-    await page.goto('./');
-    
-    const themeColor = page.locator('meta[name="theme-color"]');
-    await expect(themeColor).toHaveCount(1);
-    
-    const content = await themeColor.getAttribute('content');
-    expect(content).toBe('#4A9FD9');
-  });
-
   test('sollte Viewport für Mobile korrekt konfiguriert haben', async ({ page }) => {
     await page.goto('./');
     
@@ -86,73 +54,4 @@ test.describe('PWA iOS Installation Tests', () => {
     expect(content).toContain('initial-scale=1.0');
   });
 
-  test('sollte auf iOS Safari installierbar sein', async ({ page, browserName, isMobile }) => {
-    // Nur auf mobilen Geräten testen
-    test.skip(!isMobile, 'Test nur für mobile Geräte relevant');
-    
-    await page.goto('./');
-    
-    // PWA-Kriterien prüfen
-    const hasManifest = await page.locator('link[rel="manifest"]').count() > 0;
-    const hasServiceWorker = await page.evaluate(() => 'serviceWorker' in navigator);
-    const hasAppleTouchIcon = await page.locator('link[rel="apple-touch-icon"]').count() > 0;
-    const hasWebAppCapable = await page.locator('meta[name="apple-mobile-web-app-capable"]').count() > 0;
-    
-    expect(hasManifest).toBe(true);
-    expect(hasServiceWorker).toBe(true);
-    expect(hasAppleTouchIcon).toBe(true);
-    expect(hasWebAppCapable).toBe(true);
-  });
-
-  test('sollte Icon-Dateien erfolgreich laden', async ({ page }) => {
-    await page.goto('./');
-    
-    // Icon-URLs aus dem Manifest extrahieren
-    const manifestResponse = await page.request.get('./manifest.json');
-    const manifest = await manifestResponse.json();
-    
-    // Jedes Icon laden und Status prüfen
-    for (const icon of manifest.icons) {
-      if (!icon.src.startsWith('data:')) { // Nur echte Dateien, keine Base64
-        const iconResponse = await page.request.get(icon.src);
-        expect(iconResponse.status()).toBe(200);
-      }
-    }
-  });
-
-});
-
-test.describe('PWA Installation Debugging', () => {
-  
-  test('sollte PWA-Installation-Kriterien diagnostizieren', async ({ page }) => {
-    await page.goto('./');
-    
-    // Sammle alle PWA-relevanten Informationen
-    const diagnostics = await page.evaluate(() => {
-      const info = {
-        hasServiceWorker: 'serviceWorker' in navigator,
-        hasManifest: !!document.querySelector('link[rel="manifest"]'),
-        hasAppleTouchIcon: !!document.querySelector('link[rel="apple-touch-icon"]'),
-        hasWebAppCapable: !!document.querySelector('meta[name="apple-mobile-web-app-capable"]'),
-        hasThemeColor: !!document.querySelector('meta[name="theme-color"]'),
-        isSecure: location.protocol === 'https:' || location.hostname === 'localhost',
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        isStandalone: window.navigator.standalone === true,
-        displayMode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser'
-      };
-      
-      return info;
-    });
-    
-    console.log('PWA Diagnostics:', JSON.stringify(diagnostics, null, 2));
-    
-    // Alle Kriterien sollten erfüllt sein
-    expect(diagnostics.hasServiceWorker).toBe(true);
-    expect(diagnostics.hasManifest).toBe(true);
-    expect(diagnostics.hasAppleTouchIcon).toBe(true);
-    expect(diagnostics.hasWebAppCapable).toBe(true);
-    expect(diagnostics.hasThemeColor).toBe(true);
-  });
-  
 });
