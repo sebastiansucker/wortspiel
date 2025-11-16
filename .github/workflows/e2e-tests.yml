@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
       matrix:
-        project: [chromium, firefox, webkit, 'Mobile Chrome', 'Mobile Safari']
+        project: [chromium, firefox, webkit, 'Mobile Chrome', 'Mobile Safari', 'iPhone 13 Mini']
     
     steps:
     - name: Checkout repository

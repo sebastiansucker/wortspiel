@@ -57,6 +57,10 @@ export default defineConfig({
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
     },
+    {
+      name: 'iPhone 13 Mini',
+      use: { ...devices['iPhone 13 mini'] },
+    },
   ],
 
   /* Run your local dev server before starting the tests */
