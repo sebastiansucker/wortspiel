@@ -19,6 +19,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Wortspiel">
+    <link rel="manifest" id="site-manifest" href="/manifest.json">
     
     <style>
         :root {
@@ -122,6 +123,46 @@
             z-index: -1;
         }
         
+        #wortContainer {
+            position: relative;
+        }
+        
+        #wortEingabe {
+            display: none;
+            font-size: 3rem;
+            margin: 2rem 0;
+            padding: 2rem;
+            word-wrap: break-word;
+            background: linear-gradient(135deg, #f8f9ff, #e8f4f8);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            font-weight: 600;
+            color: #2c3e50;
+            border: none;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        #wortEingabe:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(74, 159, 217, 0.4);
+        }
+        
+        #wortEingabe::placeholder {
+            color: #aaa;
+        }
+        
+        .wort-eingabe-aktiv #wort {
+            display: none;
+        }
+        
+        .wort-eingabe-aktiv #wortEingabe {
+            display: block;
+        }
+        
         #timer {
             font-size: 2rem;
             background: var(--gradient-bg);
@@ -160,12 +201,12 @@
         }
         
         .class-selection {
-            margin: 2rem 0;
+            margin: 2rem auto;
             display: flex;
             flex-direction: column;
             gap: 1rem;
             max-width: 600px;
-            margin: 2rem auto;
+            width: 100%;
         }
         
         .class-btn {
@@ -195,6 +236,10 @@
         
         .chaos-btn {
             background: linear-gradient(135deg, var(--primary-red), var(--primary-orange));
+        }
+        
+        .wortspiel-btn {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-yellow));
         }
         
         .class-btn.selected {
@@ -367,6 +412,64 @@
             background: linear-gradient(135deg, #f8d7da, #f5c6cb);
             color: #721c24;
             border: 2px solid var(--primary-red);
+        }
+        
+        /* Das Wortspiel Modus Styles */
+        .wortspiel-input-container {
+            display: none;
+            margin: 2rem 0;
+            gap: 1rem;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .wortspiel-input-container.active {
+            display: flex;
+        }
+        
+        .wortspiel-input-container input {
+            padding: 2rem;
+            font-size: 3rem;
+            border: none;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f8f9ff, #e8f4f8);
+            font-weight: 600;
+            color: #2c3e50;
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+        
+        .wortspiel-input-container input::placeholder {
+            color: #aaa;
+        }
+        
+        .wortspiel-input-container input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(74, 159, 217, 0.4);
+        }
+        #lesenBtn {
+            display: none;
+            margin: 1.5rem auto;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, var(--primary-yellow), var(--primary-orange));
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        #lesenBtn.active {
+            display: block;
+        }
+        
+        #lesenBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
         
         .results-card {
@@ -565,21 +668,27 @@
     <button class="class-btn" id="class12Btn">Klasse 1 & 2</button>
     <button class="class-btn" id="class34Btn">Klasse 3 & 4</button>
     <button class="class-btn chaos-btn" id="chaosModeBtn">🎲 Chaos Modus</button>
+    <button class="class-btn wortspiel-btn" id="daswortspielBtn">✍️ Das Wortspiel</button>
     <div class="info">
         <p><strong>Klasse 1 & 2:</strong> Grundwortschatz mit Artikeln (etwa 250 Wörter)</p>
         <p><strong>Klasse 3 & 4:</strong> Alle Grundwörter + erweiterte Wörter mit Artikeln (etwa 550 Wörter)</p>
         <p><strong>🎲 Chaos Modus:</strong> Rechtschreibung prüfen - Richtig oder Falsch? (alle Wörter)</p>
+        <p><strong>✍️ Das Wortspiel:</strong> Wörter lesen und richtig eingeben (alle Wörter)</p>
     </div>
 </div>
 
 <div class="game-area" id="gameArea">
     <div id="selectedClass"></div>
     
-    <div class="game-card">
+    <div class="game-card" id="gameCard">
         <div id="timer">60 s</div>
-        <div id="wort">Bereit...</div>
+        <div id="wortContainer">
+            <div id="wort">Bereit...</div>
+            <input type="text" id="wortEingabe" placeholder="Geben Sie das Wort ein..." autocomplete="off">
+        </div>
         
         <button id="nextBtn" disabled>Weiter</button>
+        <button id="lesenBtn">Gelesen</button>
         <div class="answer-buttons" id="answerButtons">
             <button id="correctBtn">✓ Richtig</button>
             <button id="wrongBtn">✗ Falsch</button>
@@ -589,7 +698,7 @@
     </div>
     
     <div id="count"></div>
-    <button id="resetBtn">Neue Klassenstufe wählen</button>
+    <button id="resetBtn">Zurück</button>
 </div>
 
 <script>
@@ -705,15 +814,20 @@ let aktuell = "";
 let aktuelleWortliste = [];
 let gewählteKlasse = "";
 let chaosModus = false;
+let daswortspielModus = false;
 let istWortRichtig = true;
 let korrekte = 0, falsche = 0;
+let punkte = 0;
+let wortspielWortGezeigt = false;
 
 /* 3. DOM-Elemente */
 const classSelection = document.getElementById('classSelection');
 const gameArea = document.getElementById('gameArea');
+const gameCard = document.getElementById('gameCard');
 const class12Btn = document.getElementById('class12Btn');
 const class34Btn = document.getElementById('class34Btn');
 const chaosModeBtn = document.getElementById('chaosModeBtn');
+const daswortspielBtn = document.getElementById('daswortspielBtn');
 const selectedClassEl = document.getElementById('selectedClass');
 const wortEl = document.getElementById('wort');
 const timerEl = document.getElementById('timer');
@@ -724,11 +838,15 @@ const answerButtons = document.getElementById('answerButtons');
 const correctBtn = document.getElementById('correctBtn');
 const wrongBtn = document.getElementById('wrongBtn');
 const wordStatus = document.getElementById('wordStatus');
+const wortContainer = document.getElementById('wortContainer');
+const wortEingabe = document.getElementById('wortEingabe');
+const lesenBtn = document.getElementById('lesenBtn');
 
 /* 4. Klassenauswahl */
 function wähleKlasse(klasse) {
     gewählteKlasse = klasse;
     chaosModus = (klasse === 'chaos');
+    daswortspielModus = (klasse === 'daswortspiel');
     
     if (klasse === '12') {
         aktuelleWortliste = wortListe12;
@@ -739,15 +857,24 @@ function wähleKlasse(klasse) {
     } else if (klasse === 'chaos') {
         aktuelleWortliste = wortListe34; // Verwende alle Wörter für Chaos Modus
         selectedClassEl.innerHTML = '<h3>🎲 Chaos Modus - Rechtschreibung prüfen</h3>';
+    } else if (klasse === 'daswortspiel') {
+        aktuelleWortliste = wortListe34; // Verwende alle Wörter für Das Wortspiel
+        selectedClassEl.innerHTML = '<h3>✍️ Das Wortspiel - Wörter eingeben</h3>';
     }
     
     // UI für verschiedene Modi anpassen
     if (chaosModus) {
         nextBtn.style.display = 'none';
         answerButtons.classList.add('active');
+        wortContainer.classList.remove('wort-eingabe-aktiv');
+    } else if (daswortspielModus) {
+        nextBtn.style.display = 'none';
+        answerButtons.classList.remove('active');
+        wortContainer.classList.remove('wort-eingabe-aktiv');
     } else {
         nextBtn.style.display = 'block';
         answerButtons.classList.remove('active');
+        wortContainer.classList.remove('wort-eingabe-aktiv');
     }
     
     classSelection.style.display = 'none';
@@ -768,6 +895,8 @@ function resetGame() {
     gelesen = 0;
     korrekte = 0;
     falsche = 0;
+    punkte = 0;
+    wortspielWortGezeigt = false;
     countEl.textContent = '';
     timerEl.textContent = '60s';
     nextBtn.disabled = false;
@@ -775,6 +904,10 @@ function resetGame() {
     wrongBtn.disabled = false;
     wordStatus.textContent = '';
     wordStatus.className = 'word-status';
+    wortEingabe.value = '';
+    gameCard.classList.remove('wort-hidden');
+    wortContainer.classList.remove('wort-eingabe-aktiv');
+    wortEingabe.focus();
 }
 
 /* 6. Zurück zur Klassenauswahl */
@@ -783,9 +916,14 @@ function zurückZurAuswahl() {
         clearInterval(timerId);
     }
     gameArea.classList.remove('active');
-    classSelection.style.display = 'block';
+    classSelection.style.display = 'flex';
     resetGame();
     wortEl.textContent = 'Bereit...';
+    lesenBtn.classList.remove('active');
+    wortContainer.classList.remove('wort-eingabe-aktiv');
+    gewählteKlasse = '';
+    chaosModus = false;
+    daswortspielModus = false;
 }
 
 /* 7. Zufälliges Wort auswählen */
@@ -953,6 +1091,20 @@ function zeigeWort() {
         wrongBtn.disabled = false;
         wordStatus.textContent = '';
         wordStatus.className = 'word-status';
+    } else if (daswortspielModus) {
+        // Das Wortspiel Modus - zeige ein zufälliges Wort
+        aktuell = originalWort;
+        wortEl.textContent = aktuell;
+        wortEingabe.value = '';
+        wordStatus.textContent = '';
+        wordStatus.className = 'word-status';
+        lesenBtn.disabled = false;
+        
+        // Wort wird angezeigt, Wort ist noch nicht gelesen
+        wortspielWortGezeigt = false;
+        wortContainer.classList.remove('wort-eingabe-aktiv');
+        lesenBtn.classList.add('active');
+        wortEingabe.focus();
     } else {
         aktuell = originalWort;
         wortEl.textContent = aktuell;
@@ -987,6 +1139,43 @@ function verarbeiteAntwort(userAntwort) {
     }, 1500);
 }
 
+/* 10b. Das Wortspiel Modus - Eingabe verarbeiten */
+function verarbeiteWortspielEingabe() {
+    const benutzerEingabe = wortEingabe.value.trim();
+    const korrekteEingabe = aktuell.toLowerCase();
+    const istKorrekt = benutzerEingabe.toLowerCase() === korrekteEingabe;
+    
+    gelesen++;
+    
+    if (istKorrekt) {
+        punkte++;
+        wordStatus.textContent = '✓ Richtig! +1 Punkt';
+        wordStatus.className = 'word-status correct';
+    } else {
+        wordStatus.textContent = `✗ Falsch! Richtig: "${aktuell}"`;
+        wordStatus.className = 'word-status incorrect';
+    }
+    
+    wortEingabe.disabled = true;
+    
+    // Nach kurzer Verzögerung nächstes Wort zeigen
+    setTimeout(() => {
+        if (restzeit > 0) {
+            wortEingabe.disabled = false;
+            zeigeWort();
+        }
+    }, 2000);
+}
+
+/* 10c. Das Wortspiel Modus - "Gelesen" Button Handler */
+function handleGelessenButton() {
+    wortspielWortGezeigt = true;
+    wortContainer.classList.add('wort-eingabe-aktiv');
+    lesenBtn.classList.remove('active');
+    wortEingabe.value = '';
+    wortEingabe.focus();
+}
+
 /* 11. Timer-Logik */
 function startTimer() {
     timerEl.textContent = `${restzeit}s`;
@@ -998,6 +1187,7 @@ function startTimer() {
             nextBtn.disabled = true;
             correctBtn.disabled = true;
             wrongBtn.disabled = true;
+            wortInput.disabled = true;
             wortEl.textContent = "⏰ Zeit abgelaufen!";
             
             let ergebnisText = '';
@@ -1010,6 +1200,17 @@ function startTimer() {
                         <p>✓ Richtig: ${korrekte} | ✗ Falsch: ${falsche}</p>
                         <p><strong>Genauigkeit: ${prozent}%</strong></p>
                         <p style="color: #666;">Modus: 🎲 Chaos Modus</p>
+                    </div>
+                `;
+            } else if (daswortspielModus) {
+                const prozent = gelesen > 0 ? Math.round((punkte / gelesen) * 100) : 0;
+                ergebnisText = `
+                    <div class="results-card">
+                        <h3>🎉 Das Wortspiel Ergebnis</h3>
+                        <p><strong>${gelesen} Wörter angezeigt!</strong></p>
+                        <p>✓ Richtig: ${punkte} | ✗ Falsch: ${gelesen - punkte}</p>
+                        <p><strong>Genauigkeit: ${prozent}%</strong></p>
+                        <p style="color: #666;">Modus: ✍️ Das Wortspiel</p>
                     </div>
                 `;
             } else {
@@ -1031,6 +1232,7 @@ function startTimer() {
 class12Btn.addEventListener('click', () => wähleKlasse('12'));
 class34Btn.addEventListener('click', () => wähleKlasse('34'));
 chaosModeBtn.addEventListener('click', () => wähleKlasse('chaos'));
+daswortspielBtn.addEventListener('click', () => wähleKlasse('daswortspiel'));
 resetBtn.addEventListener('click', zurückZurAuswahl);
 
 nextBtn.addEventListener('click', () => {
@@ -1042,28 +1244,13 @@ nextBtn.addEventListener('click', () => {
 correctBtn.addEventListener('click', () => verarbeiteAntwort(true));
 wrongBtn.addEventListener('click', () => verarbeiteAntwort(false));
 
-// Service Worker registrieren für PWA
-    // ...existing code...
-    // Register service worker with correct scope for GitHub Pages subpath
-    if ('serviceWorker' in navigator) {
-        (function registerSWWithScope() {
-            // compute base path like '/wortspiel/' from location.pathname
-            const pathParts = location.pathname.split('/').filter(Boolean);
-            let base = '/';
-            if (pathParts.length > 0) {
-                // if repo is served at github pages like /<user>/<repo>/, use first two parts
-                // typical path: /wortspiel/ or /<user>/<repo>/ on GitHub pages; we prefer the repo name
-                base = `/${pathParts[0]}/`;
-            }
-            const swUrl = base + 'sw.js';
-            const manifestEl = document.getElementById('site-manifest');
-            if (manifestEl) manifestEl.href = base + 'manifest.json';
-
-            navigator.serviceWorker.register(swUrl, { scope: base })
-                .then(() => console.log('Service Worker registriert mit scope', base))
-                .catch(err => console.error('Service Worker Fehler:', err));
-        })();
+// Das Wortspiel Modus Event Listener
+lesenBtn.addEventListener('click', handleGelessenButton);
+wortEingabe.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !wortEingabe.disabled) {
+        verarbeiteWortspielEingabe();
     }
+});
 
 /* -------------- JavaScript endet hier -------------- */
 </script>
