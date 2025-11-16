@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
       matrix:
-        browser: [chromium, firefox, webkit, 'Mobile Chrome', 'Mobile Safari']
+        project: [chromium, firefox, webkit, 'Mobile Chrome', 'Mobile Safari']
     
     steps:
     - name: Checkout repository
@@ -31,18 +31,18 @@ jobs:
       run: npm ci
     
     - name: Install Playwright browsers
-      run: npx playwright install --with-deps ${{ matrix.browser }}
+      run: npx playwright install --with-deps
     
     # Server wird automatisch von Playwright gestartet (siehe playwright.config.js webServer)
     
     - name: Run E2E tests
-      run: npx playwright test --project=${{ matrix.browser }}
+      run: npx playwright test --project="${{ matrix.project }}"
     
     - name: Upload test results
       uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: playwright-report-${{ matrix.browser }}
+        name: playwright-report-${{ matrix.project }}
         path: playwright-report/
         retention-days: 7
     
@@ -50,6 +50,6 @@ jobs:
       uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: screenshots-${{ matrix.browser }}
+        name: screenshots-${{ matrix.project }}
         path: test-results/
         retention-days: 7
