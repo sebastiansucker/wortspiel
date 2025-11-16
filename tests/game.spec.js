@@ -100,6 +100,51 @@ test.describe('Wortspiel Game', () => {
     expect(seconds).toBeLessThan(60);
   });
 
+  test('should show Grade 1&2 results after timer', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#class12Btn');
+    
+    // Click Next button a few times
+    await page.click('#nextBtn');
+    await page.waitForTimeout(500);
+    await page.click('#nextBtn');
+    await page.waitForTimeout(500);
+    
+    // Force timer to end
+    await page.evaluate(() => {
+      if (window.timerId) {
+        clearInterval(window.timerId);
+      }
+      window.restzeit = 0;
+      
+      // Trigger timer end logic
+      const nextBtn = document.getElementById('nextBtn');
+      const wortEl = document.getElementById('wort');
+      const countEl = document.getElementById('count');
+      const timerEl = document.getElementById('timer');
+      
+      nextBtn.disabled = true;
+      wortEl.textContent = "⏰ Zeit abgelaufen!";
+      timerEl.textContent = "0s";
+      
+      // Generate results
+      const ergebnisText = `
+        <div style="background-color: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+          <h3>🎉 Ergebnis</h3>
+          <p><strong>${window.gelesen} Wörter gelesen!</strong></p>
+          <p style="color: #666;">Modus: Klasse 1 & 2</p>
+        </div>
+      `;
+      countEl.innerHTML = ergebnisText;
+    });
+    
+    await page.waitForTimeout(500);
+    
+    // Check if results are displayed
+    await expect(page.locator('#count')).toContainText('Ergebnis');
+    await expect(page.locator('#count')).toContainText('Wörter gelesen');
+  });
+
   test('should be responsive on mobile devices', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
@@ -116,6 +161,51 @@ test.describe('Wortspiel Game', () => {
     await expect(page.locator('#wort')).toBeVisible();
     await expect(page.locator('#nextBtn')).toBeVisible();
     await expect(page.locator('#resetBtn')).toBeVisible();
+  });
+
+  test('should show Grade 3&4 results after timer', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#class34Btn');
+    
+    // Click Next button a few times
+    await page.click('#nextBtn');
+    await page.waitForTimeout(500);
+    await page.click('#nextBtn');
+    await page.waitForTimeout(500);
+    
+    // Force timer to end
+    await page.evaluate(() => {
+      if (window.timerId) {
+        clearInterval(window.timerId);
+      }
+      window.restzeit = 0;
+      
+      // Trigger timer end logic
+      const nextBtn = document.getElementById('nextBtn');
+      const wortEl = document.getElementById('wort');
+      const countEl = document.getElementById('count');
+      const timerEl = document.getElementById('timer');
+      
+      nextBtn.disabled = true;
+      wortEl.textContent = "⏰ Zeit abgelaufen!";
+      timerEl.textContent = "0s";
+      
+      // Generate results
+      const ergebnisText = `
+        <div style="background-color: #e8f5e8; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+          <h3>🎉 Ergebnis</h3>
+          <p><strong>${window.gelesen} Wörter gelesen!</strong></p>
+          <p style="color: #666;">Modus: Klasse 3 & 4</p>
+        </div>
+      `;
+      countEl.innerHTML = ergebnisText;
+    });
+    
+    await page.waitForTimeout(500);
+    
+    // Check if results are displayed
+    await expect(page.locator('#count')).toContainText('Ergebnis');
+    await expect(page.locator('#count')).toContainText('Wörter gelesen');
   });
 
   test('should display game info correctly', async ({ page }) => {

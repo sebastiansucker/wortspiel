@@ -25,7 +25,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Wortspiel">
-    <link rel="manifest" id="site-manifest" href="/manifest.json">
     
     <style>
         :root {
@@ -908,6 +907,8 @@ function resetGame() {
     nextBtn.disabled = false;
     correctBtn.disabled = false;
     wrongBtn.disabled = false;
+    wortEingabe.disabled = false;
+    lesenBtn.disabled = false;
     wordStatus.textContent = '';
     wordStatus.className = 'word-status';
     wortEingabe.value = '';
@@ -1193,7 +1194,8 @@ function startTimer() {
             nextBtn.disabled = true;
             correctBtn.disabled = true;
             wrongBtn.disabled = true;
-            wortInput.disabled = true;
+            wortEingabe.disabled = true;
+            lesenBtn.disabled = true;
             wortEl.textContent = "⏰ Zeit abgelaufen!";
             
             let ergebnisText = '';
