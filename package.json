@@ -8,11 +8,15 @@
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
     "test:debug": "npx playwright test --debug",
-    "test:ui": "npx playwright test --ui"
+    "test:ui": "npx playwright test --ui",
+    "lint": "eslint ."
   },
   "devDependencies": {
-    "@playwright/test": "^1.40.0",
     "@axe-core/playwright": "^4.8.0",
+    "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.40.0",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
     "http-server": "^14.1.1"
   },
   "keywords": [

@@ -55,9 +55,6 @@ test.describe('Wortspiel Game', () => {
     await page.goto('/');
     await page.click('#class12Btn');
     
-    // Get initial word
-    const initialWord = await page.locator('#wort').textContent();
-    
     // Click Next button
     await page.click('#nextBtn');
     
@@ -124,8 +121,8 @@ test.describe('Wortspiel Game', () => {
       const timerEl = document.getElementById('timer');
       
       nextBtn.disabled = true;
-      wortEl.textContent = "⏰ Zeit abgelaufen!";
-      timerEl.textContent = "0s";
+      wortEl.textContent = '⏰ Zeit abgelaufen!';
+      timerEl.textContent = '0s';
       
       // Generate results
       const ergebnisText = `
@@ -187,8 +184,8 @@ test.describe('Wortspiel Game', () => {
       const timerEl = document.getElementById('timer');
       
       nextBtn.disabled = true;
-      wortEl.textContent = "⏰ Zeit abgelaufen!";
-      timerEl.textContent = "0s";
+      wortEl.textContent = '⏰ Zeit abgelaufen!';
+      timerEl.textContent = '0s';
       
       // Generate results
       const ergebnisText = `
@@ -304,8 +301,8 @@ test.describe('Wortspiel Game', () => {
       nextBtn.disabled = true;
       correctBtn.disabled = true;
       wrongBtn.disabled = true;
-      wortEl.textContent = "⏰ Zeit abgelaufen!";
-      timerEl.textContent = "0s";
+      wortEl.textContent = '⏰ Zeit abgelaufen!';
+      timerEl.textContent = '0s';
       
       // Generate results (using global variables from the game)
       const prozent = window.gelesen > 0 ? Math.round((window.korrekte / window.gelesen) * 100) : 0;
