@@ -59,7 +59,7 @@ jobs:
       run: npx playwright test --project="${{ matrix.project }}"
     
     - name: Upload test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: failure()
       with:
         name: playwright-report-${{ matrix.project }}
@@ -67,7 +67,7 @@ jobs:
         retention-days: 7
     
     - name: Upload screenshots
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: failure()
       with:
         name: screenshots-${{ matrix.project }}
