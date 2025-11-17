@@ -1,0 +1,18 @@
+{
+  "name": "Wortspiel - Deutsches Lesespiel",
+  "short_name": "Wortspiel",
+  "description": "Interaktives deutsches Wortspiel für Grundschüler mit Rechtschreibprüfung und Chaos Modus",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4A9FD9",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
