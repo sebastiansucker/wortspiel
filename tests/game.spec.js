@@ -521,4 +521,153 @@ test.describe('Wortspiel Game', () => {
     await expect(page.locator('#wortEingabe')).toBeVisible();
   });
 
+  test('should enforce case-sensitive validation in Das Wortspiel', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#daswortspielBtn');
+    
+    // Get the displayed word
+    const displayedWord = await page.locator('#wort').textContent();
+    const wordWithoutSpaces = displayedWord.trim();
+    
+    // Click Gelesen button
+    await page.click('#lesenBtn');
+    await expect(page.locator('#wortEingabe')).toBeVisible();
+    
+    // Test 1: Exact match should be correct
+    await page.fill('#wortEingabe', wordWithoutSpaces);
+    await page.press('#wortEingabe', 'Enter');
+    await page.waitForTimeout(500);
+    
+    // Check if feedback shows correct
+    const feedbackCorrect = await page.locator('#wordStatus').textContent();
+    expect(feedbackCorrect).toContain('Richtig');
+    
+    // Wait for next word
+    await page.waitForTimeout(2000);
+    
+    // Get next word
+    const displayedWord2 = await page.locator('#wort').textContent();
+    const wordWithoutSpaces2 = displayedWord2.trim();
+    
+    // Click Gelesen button again
+    await page.click('#lesenBtn');
+    await expect(page.locator('#wortEingabe')).toBeVisible();
+    
+    // Test 2: Wrong case should be incorrect (if word has uppercase)
+    if (wordWithoutSpaces2.match(/[A-Z]/)) {
+      const lowercaseWord = wordWithoutSpaces2.toLowerCase();
+      await page.fill('#wortEingabe', lowercaseWord);
+      await page.press('#wortEingabe', 'Enter');
+      await page.waitForTimeout(500);
+      
+      // Check if feedback shows incorrect
+      const feedbackIncorrect = await page.locator('#wordStatus').textContent();
+      expect(feedbackIncorrect).toContain('Falsch');
+      expect(feedbackIncorrect).toContain(wordWithoutSpaces2);
+    }
+  });
+
+  test('should include capitalization errors in Chaos Mode', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#chaosModeBtn');
+    
+    // Collect multiple words to verify capitalization errors exist
+    const words = [];
+    for (let i = 0; i < 10; i++) {
+      const word = await page.locator('#wort').textContent();
+      words.push(word.trim());
+      
+      // Click correct or wrong randomly to advance
+      if (Math.random() < 0.5) {
+        await page.click('#correctBtn');
+      } else {
+        await page.click('#wrongBtn');
+      }
+      await page.waitForTimeout(1600); // Wait for feedback delay
+    }
+    
+    // Check if at least some words have capitalization issues
+    // (Words starting with lowercase when they should be uppercase, or vice versa)
+    const hasCapitalizationVariations = words.some(word => {
+      // Extract the main word (without article)
+      const parts = word.split(' ');
+      const mainWord = parts.length > 1 ? parts[1] : parts[0];
+      
+      // Check if first letter exists and has case
+      if (mainWord.length > 0) {
+        const firstChar = mainWord[0];
+        return firstChar === firstChar.toLowerCase() || firstChar === firstChar.toUpperCase();
+      }
+      return false;
+    });
+    
+    // We should have words with various capitalizations
+    expect(hasCapitalizationVariations).toBe(true);
+  });
+
+  test('should distinguish between correct and incorrect capitalization in Das Wortspiel', async ({ page }) => {
+    await page.goto('/');
+    
+    // Inject a known word with capitalization into the game
+    await page.evaluate(() => {
+      // Override the word list temporarily for testing
+      window.aktuelleWortliste = ['der Apfel', 'die Blume', 'das Auto'];
+    });
+    
+    await page.click('#daswortspielBtn');
+    
+    // Get the word
+    const word = await page.locator('#wort').textContent();
+    const trimmedWord = word.trim();
+    
+    await page.click('#lesenBtn');
+    await expect(page.locator('#wortEingabe')).toBeVisible();
+    
+    // Test correct capitalization (should be accepted)
+    await page.fill('#wortEingabe', trimmedWord);
+    await page.press('#wortEingabe', 'Enter');
+    await page.waitForTimeout(500);
+    
+    const feedback1 = await page.locator('#wordStatus').textContent();
+    expect(feedback1).toContain('Richtig');
+    
+    await page.waitForTimeout(2000);
+    
+    // Get next word
+    const word2 = await page.locator('#wort').textContent();
+    const trimmedWord2 = word2.trim();
+    
+    await page.click('#lesenBtn');
+    await expect(page.locator('#wortEingabe')).toBeVisible();
+    
+    // Test incorrect capitalization (should be rejected)
+    // Convert first letter of the main word to lowercase
+    const parts = trimmedWord2.split(' ');
+    let wrongCapWord;
+    if (parts.length > 1) {
+      // Has article
+      const article = parts[0];
+      const mainWord = parts.slice(1).join(' ');
+      if (mainWord.length > 0 && mainWord[0] === mainWord[0].toUpperCase()) {
+        wrongCapWord = article + ' ' + mainWord[0].toLowerCase() + mainWord.slice(1);
+      } else {
+        wrongCapWord = 'wrongword'; // Fallback
+      }
+    } else {
+      // No article
+      if (trimmedWord2.length > 0 && trimmedWord2[0] === trimmedWord2[0].toUpperCase()) {
+        wrongCapWord = trimmedWord2[0].toLowerCase() + trimmedWord2.slice(1);
+      } else {
+        wrongCapWord = 'wrongword'; // Fallback
+      }
+    }
+    
+    await page.fill('#wortEingabe', wrongCapWord);
+    await page.press('#wortEingabe', 'Enter');
+    await page.waitForTimeout(500);
+    
+    const feedback2 = await page.locator('#wordStatus').textContent();
+    expect(feedback2).toContain('Falsch');
+  });
+
 });

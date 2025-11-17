@@ -1051,6 +1051,21 @@ function verfremdeWort(wort) {
                 return w.replace(new RegExp(paar[1], 'g'), paar[0]);
             }
             return w;
+        },
+        
+        // Groß- und Kleinschreibung vertauschen (typischer Fehler bei Nomen)
+        (w) => {
+            if (w.length > 0) {
+                // 50% Chance: Ersten Buchstaben klein schreiben
+                if (w[0] === w[0].toUpperCase() && w[0] !== w[0].toLowerCase()) {
+                    return w[0].toLowerCase() + w.slice(1);
+                }
+                // 50% Chance: Ersten Buchstaben groß schreiben (wenn er klein ist)
+                if (w[0] === w[0].toLowerCase() && w[0] !== w[0].toUpperCase()) {
+                    return w[0].toUpperCase() + w.slice(1);
+                }
+            }
+            return w;
         }
     ];
     
@@ -1149,8 +1164,7 @@ function verarbeiteAntwort(userAntwort) {
 /* 10b. Das Wortspiel Modus - Eingabe verarbeiten */
 function verarbeiteWortspielEingabe() {
     const benutzerEingabe = wortEingabe.value.trim();
-    const korrekteEingabe = aktuell.toLowerCase();
-    const istKorrekt = benutzerEingabe.toLowerCase() === korrekteEingabe;
+    const istKorrekt = benutzerEingabe === aktuell;
     
     gelesen++;
     
