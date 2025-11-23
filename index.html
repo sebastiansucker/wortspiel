@@ -817,6 +817,7 @@ const wortListe34 = [...wortListe12, ...zusätzlicheWörter34];
 
 /* 2. Spielvariablen */
 let timerId, restzeit = 60;
+let initialRestzeit = 60; // Speichert die ursprüngliche Zeitdauer
 let gelesen = 0;
 let aktuell = "";
 let aktuelleWortliste = [];
@@ -855,6 +856,13 @@ function wähleKlasse(klasse) {
     gewählteKlasse = klasse;
     chaosModus = (klasse === 'chaos');
     daswortspielModus = (klasse === 'daswortspiel');
+    
+    // Setze die Zeitdauer basierend auf dem Modus
+    if (daswortspielModus) {
+        initialRestzeit = 180; // 3 Minuten für "Das Wortspiel"
+    } else {
+        initialRestzeit = 60; // 1 Minute für andere Modi
+    }
     
     if (klasse === '12') {
         aktuelleWortliste = wortListe12;
@@ -899,14 +907,14 @@ function resetGame() {
     if (timerId) {
         clearInterval(timerId);
     }
-    restzeit = 60;
+    restzeit = initialRestzeit; // Nutze die Zeitdauer basierend auf dem Modus
     gelesen = 0;
     korrekte = 0;
     falsche = 0;
     punkte = 0;
     wortspielWortGezeigt = false;
     countEl.textContent = '';
-    timerEl.textContent = '60s';
+    timerEl.textContent = `${initialRestzeit}s`;
     nextBtn.disabled = false;
     correctBtn.disabled = false;
     wrongBtn.disabled = false;

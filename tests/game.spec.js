@@ -346,8 +346,8 @@ test.describe('Wortspiel Game', () => {
     // Check if game area becomes visible
     await expect(page.locator('#gameArea')).toBeVisible();
     
-    // Check if timer is displayed
-    await expect(page.locator('#timer')).toContainText('60s');
+    // Check if timer is displayed (should be 180s for Das Wortspiel)
+    await expect(page.locator('#timer')).toContainText('180s');
     
     // Check if a word is displayed
     await expect(page.locator('#wort')).not.toBeEmpty();
