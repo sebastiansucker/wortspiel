@@ -1169,7 +1169,7 @@ function verarbeiteAntwort(userAntwort) {
         falsche++;
         wordStatus.textContent = istWortRichtig ? '✗ Falsch! Das Wort ist richtig geschrieben.' : `✗ Falsch! Das Wort ist falsch geschrieben. Richtig: ${korrekteWort}`;
         wordStatus.className = 'word-status incorrect';
-        // Zeige das korrekt geschriebene Wort an, wenn ein falsches Wort falsch beantwortet wurde
+        // Zeige das korrekt geschriebene Wort an, wenn der Benutzer ein falsch geschriebenes Wort als richtig markiert hat
         if (!istWortRichtig) {
             wortEl.textContent = korrekteWort;
         }
