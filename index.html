@@ -834,6 +834,7 @@ let gewählteKlasse = "";
 let chaosModus = false;
 let daswortspielModus = false;
 let istWortRichtig = true;
+let korrekteWort = "";
 let korrekte = 0, falsche = 0;
 let punkte = 0;
 let wortspielWortGezeigt = false;
@@ -1116,6 +1117,7 @@ function zeigeWort() {
     if (chaosModus) {
         // 70% Chance auf falsches Wort, 30% auf richtiges
         istWortRichtig = Math.random() < 0.3;
+        korrekteWort = originalWort;
         
         if (istWortRichtig) {
             aktuell = originalWort;
@@ -1165,8 +1167,12 @@ function verarbeiteAntwort(userAntwort) {
         wordStatus.className = 'word-status correct';
     } else {
         falsche++;
-        wordStatus.textContent = istWortRichtig ? '✗ Falsch! Das Wort ist richtig geschrieben.' : '✗ Falsch! Das Wort ist falsch geschrieben.';
+        wordStatus.textContent = istWortRichtig ? '✗ Falsch! Das Wort ist richtig geschrieben.' : `✗ Falsch! Das Wort ist falsch geschrieben. Richtig: ${korrekteWort}`;
         wordStatus.className = 'word-status incorrect';
+        // Zeige das korrekt geschriebene Wort an, wenn ein falsches Wort falsch beantwortet wurde
+        if (!istWortRichtig) {
+            wortEl.textContent = korrekteWort;
+        }
     }
     
     gelesen++;

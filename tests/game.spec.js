@@ -605,6 +605,39 @@ test.describe('Wortspiel Game', () => {
     expect(hasCapitalizationVariations).toBe(true);
   });
 
+  test('should show correct word after wrong answer on misspelled word in Chaos Mode', async ({ page }) => {
+    await page.goto('/');
+
+    // Override Math.random to always return 0.5 so that:
+    // - istWortRichtig = (0.5 < 0.3) = false → word is always misspelled
+    // - verfremdeWort picks a deterministic error type
+    await page.evaluate(() => {
+      Math.random = () => 0.5;
+    });
+
+    await page.click('#chaosModeBtn');
+
+    // The displayed word is misspelled (Math.random = 0.5 > 0.3)
+    const misspelledWord = await page.locator('#wort').textContent();
+
+    // User incorrectly clicks "Richtig" for a misspelled word
+    await page.click('#correctBtn');
+
+    // Read the result synchronously before the 1500ms next-word timeout fires
+    await page.waitForTimeout(100);
+
+    const correctedWord = await page.locator('#wort').textContent();
+    const statusText = await page.locator('#wordStatus').textContent();
+
+    // The displayed word should have changed to the correct spelling
+    expect(correctedWord.trim()).not.toBe(misspelledWord.trim());
+
+    // Status message should indicate wrong answer and contain the correct word
+    expect(statusText).toContain('Falsch');
+    expect(statusText).toContain('Richtig:');
+    expect(statusText).toContain(correctedWord.trim());
+  });
+
   test('should distinguish between correct and incorrect capitalization in Das Wortspiel', async ({ page }) => {
     await page.goto('/');
     
